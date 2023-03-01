@@ -1,0 +1,78 @@
+1. Selezionare tutti i corsi del Corso di Laurea in Informatica (22)
+SELECT *
+FROM `courses`
+INNER JOIN `degrees`
+ON `courses`.`degree_id` = `degrees`.`id`
+WHERE `degrees`.`name` = 'Corso di Laurea in Informatica';
+
+2. Selezionare le informazioni sul corso con id = 144, con tutti i relativi appelli d’esame
+SELECT *
+FROM `courses`
+INNER JOIN `exams`
+ON `courses`.`id` = `exams`.`course_id`
+WHERE `courses`.`id` = 144;
+
+3. Selezionare a quale dipartimento appartiene il Corso di Laurea in Diritto dell'Economia (Dipartimento di Scienze politiche, giuridiche e studi internazionali)
+SELECT *
+FROM `departments`
+INNER JOIN `degrees`
+ON `departments`.`id` = `degrees`.`department_id`
+WHERE `degrees`.`name` = "Corso di Laurea in Diritto dell'Economia";
+
+4. Selezionare tutti gli appelli d'esame del Corso di Laurea Magistrale in Fisica del primo anno
+SELECT *
+FROM `exams`
+INNER JOIN `courses`
+ON `exams`.`course_id` = `courses`.`id`
+INNER JOIN `degrees`
+ON `courses`.`degree_id` = `degrees`.`id`
+WHERE `degrees`.`name` = 'Corso di Laurea Magistrale in Fisica'
+AND `courses`.`year` = 1;
+
+5. Selezionare tutti i docenti che insegnano nel Corso di Laurea in Lettere (21)
+SELECT DISTINCT `teachers`.*, degrees.name
+FROM `teachers`
+INNER JOIN course_teacher
+ON teachers.id = course_teacher.teacher_id
+INNER JOIN courses
+ON course_teacher.course_id = courses.id
+INNER JOIN degrees
+ON courses.degree_id = degrees.id
+WHERE degrees.name = 'Corso di Laurea in Lettere'
+ORDER BY teachers.id;
+
+6. Selezionare il libretto universitario di Mirco Messina (matricola n. 620320)
+SELECT students.surname, exam_student.exam_id, exam_student.vote, exams.hour, exams.date
+FROM `students`
+INNER JOIN exam_student
+ON students.id = exam_student.student_id
+INNER JOIN exams
+ON exam_student.exam_id = exams.id
+WHERE students.surname = 'Messina'
+AND students.name = 'Mirco'
+AND exam_student.vote >= 18;
+
+Versione con nome esame:
+SELECT students.surname, courses.name, exam_student.vote, exams.hour, exams.date
+FROM `students`
+INNER JOIN exam_student
+ON students.id = exam_student.student_id
+INNER JOIN exams
+ON exam_student.exam_id = exams.id
+INNER JOIN courses
+ON exams.course_id = courses.id
+WHERE students.surname = 'Messina'
+AND students.name = 'Mirco'
+AND exam_student.vote >= 18;
+
+7. Selezionare il voto medio di superamento d'esame per ogni corso, con anche i dati del corso di laurea associato, ordinati per media voto decrescente
+SELECT courses.id, courses.name, courses.period, courses.year, courses.cfu, degrees.name AS corso_di_laurea, AVG(exam_student.vote) AS avg_vote
+FROM `courses`
+INNER JOIN exams
+ON courses.id = exams.course_id
+INNER JOIN exam_student
+ON exams.id = exam_student.exam_id
+INNER JOIN degrees
+ON courses.degree_id = degrees.id
+WHERE exam_student.vote >= 18
+GROUP BY courses.id, courses.name, courses.period, courses.year, courses.cfu, corso_di_laurea;
